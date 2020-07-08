@@ -3,7 +3,7 @@ const { ObjectId } = mongoose.Schema;
 
 const itemSchema = new mongoose.Schema({
   title: {
-    String,
+    type: String,
     required: true,
   },
   price: {
@@ -14,12 +14,29 @@ const itemSchema = new mongoose.Schema({
     type: String,
     default: 'Indonesia',
   },
-  description: {
+  city: {
     type: String,
     required: true,
   },
   isPopular: {
+    type: Boolean,
+    default: false,
+  },
+  description: {
     type: String,
+    required: true,
+  },
+  unit: {
+    type: String,
+    default: 'night',
+  },
+  sumBooking: {
+    type: Number,
+    default: 0,
+  },
+  categoryId: {
+    type: ObjectId,
+    ref: 'Category',
   },
   imageId: [
     {
