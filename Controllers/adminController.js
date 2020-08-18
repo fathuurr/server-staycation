@@ -5,11 +5,48 @@ const Item = require('../Models/Item');
 const Image = require('../Models/Image');
 const Feature = require('../Models/Feature');
 const Activity = require('../Models/Activity');
+const Users = require('../Models/Users');
 const fs = require('fs-extra');
 const path = require('path');
-const { S_IRGRP } = require('constants');
+const bcrypt = require('bcrypt');
 
 module.exports = {
+  viewSignIn: async (req, res) => {
+    try {
+      const alertMessage = req.flash('alertMessage');
+      const alertStatus = req.flash('alertStatus');
+      const alert = { message: alertMessage, status: alertStatus };
+      res.render('index.ejs', {
+        alert,
+        title: 'Staycation | Login',
+      });
+    } catch (error) {
+      res.redirect('/admin/signin');
+    }
+  },
+
+  actionSignIn: async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      const user = await Users.findOne({ username: username });
+
+      if (!user) {
+        req.flash('alertMessage', 'Users Not Found');
+        req.flash('alertStatus', 'danger');
+        res.redirect('/admin/signin');
+      }
+      const isPasswordMatch = await bcrypt.compare(password, user.password);
+      if (!isPasswordMatch) {
+        req.flash('alertMessage', 'Password do not match');
+        req.flash('alertStatus', 'danger');
+        res.redirect('/admin/signin');
+      }
+      res.redirect('/admin/dashboard');
+    } catch (error) {
+      res.redirect('/admin/signin');
+    }
+  },
+
   viewDashboard: (req, res) => {
     res.render('admin/dashboard/view_dashboard.ejs', {
       title: 'Staycation | Dashboard',

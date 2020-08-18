@@ -3,7 +3,7 @@ var mongoose = require('mongoose');
 
 // Connect to MongoDB via Mongoose
 seeder.connect(
-  'mongodb://127.0.0.1:27017/db_staycation',
+  'mongodb://localhost:27017/db_staycation',
   {
     useNewUrlParser: true,
     useCreateIndex: true,
@@ -1069,14 +1069,14 @@ var data = [
     documents: [
       {
         _id: mongoose.Types.ObjectId('5e96cbe292b97300fc903322'),
-        nameBank: 'Mandiri',
+        bankName: 'Mandiri',
         nomorRekening: '089898',
         name: 'elfin',
         imageUrl: 'images/logo bca.png',
       },
       {
         _id: mongoose.Types.ObjectId('5e96cbe292b97300fc903323'),
-        nameBank: 'BCA',
+        bankName: 'BCA',
         nomorRekening: '878678',
         name: 'elfin',
         imageUrl: 'images/logo mandiri.png',
