@@ -1,15 +1,15 @@
-const mongoose = require('mongoose');
 const Category = require('../Models/Category');
 const Bank = require('../Models/Bank');
 const Item = require('../Models/Item');
 const Image = require('../Models/Image');
 const Feature = require('../Models/Feature');
 const Activity = require('../Models/Activity');
+const Booking = require('../Models/Booking');
+const Member = require('../Models/Member');
 const Users = require('../Models/Users');
 const fs = require('fs-extra');
 const path = require('path');
 const bcrypt = require('bcrypt');
-const { json } = require('express');
 
 module.exports = {
   viewSignIn: async (req, res) => {
@@ -63,14 +63,20 @@ module.exports = {
     res.redirect('/admin/signin');
   },
 
-  viewDashboard: (req, res) => {
+  viewDashboard: async (req, res) => {
     try {
+      const member = await Member.find();
+      const booking = await Booking.find();
+      const item = await Item.find();
       res.render('admin/dashboard/view_dashboard.ejs', {
         title: 'Staycation | Dashboard',
         user: req.session.user,
+        member,
+        booking,
+        item,
       });
     } catch (error) {
-      console.log(error);
+      res.redirect('/admin/dashboard');
     }
   },
   viewCategory: async (req, res) => {
@@ -592,10 +598,66 @@ module.exports = {
     }
   },
 
-  viewBooking: (req, res) => {
-    res.render('admin/booking/view_booking.ejs', {
-      title: 'Staycation | Booking',
-      user: req.session.user,
-    });
+  viewBooking: async (req, res) => {
+    try {
+      const alertMessage = req.flash('alertMessage');
+      const alertStatus = req.flash('alertStatus');
+      const alert = { message: alertMessage, status: alertStatus };
+      const booking = await Booking.find()
+        .populate('memberId')
+        .populate('bankId');
+      res.render('admin/booking/view_booking.ejs', {
+        title: 'Staycation | Booking',
+        user: req.session.user,
+        booking,
+        alert,
+      });
+    } catch (error) {
+      res.redirect('/admin/booking');
+    }
+  },
+
+  showDetailBooking: async (req, res) => {
+    const { id } = req.params;
+    try {
+      const booking = await Booking.findOne({ _id: id })
+        .populate('memberId')
+        .populate('bankId');
+
+      res.render('admin/booking/show_detail_booking.ejs', {
+        title: 'Staycation | Detail Booking',
+        user: req.session.user,
+        booking,
+      });
+    } catch (error) {
+      res.redirect('/admin/booking');
+    }
+  },
+
+  actionConfirmation: async (req, res) => {
+    const { id } = req.params;
+    try {
+      const booking = await Booking.findOne({ _id: id });
+      booking.payments.status = 'Accept';
+      await booking.save();
+      req.flash('alertMessage', 'Success Confirm Payment');
+      req.flash('alertStatus', 'success');
+      res.redirect(`/admin/booking/${id}`);
+    } catch (error) {
+      res.redirect(`/admin/booking'${id}`);
+    }
+  },
+  actionRejection: async (req, res) => {
+    const { id } = req.params;
+    try {
+      const booking = await Booking.findOne({ _id: id });
+      booking.payments.status = 'Reject';
+      await booking.save();
+      req.flash('alertMessage', 'Success Reject Payment');
+      req.flash('alertStatus', 'success');
+      res.redirect(`/admin/booking/${id}`);
+    } catch (error) {
+      res.redirect(`/admin/booking'${id}`);
+    }
   },
 };
