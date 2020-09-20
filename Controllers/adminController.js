@@ -12,13 +12,13 @@ const path = require('path');
 const bcrypt = require('bcrypt');
 
 module.exports = {
-  viewSignin: async (req, res) => {
+  viewSignIn: async (req, res) => {
     try {
       const alertMessage = req.flash('alertMessage');
       const alertStatus = req.flash('alertStatus');
       const alert = { message: alertMessage, status: alertStatus };
       if (req.session.user == null || req.session.user == undefined) {
-        res.render('index', {
+        res.render('index.ejs', {
           alert,
           title: 'Staycation | Login',
         });
@@ -30,18 +30,19 @@ module.exports = {
     }
   },
 
-  actionSignin: async (req, res) => {
+  actionSignIn: async (req, res) => {
     try {
       const { username, password } = req.body;
       const user = await Users.findOne({ username: username });
+
       if (!user) {
-        req.flash('alertMessage', 'User yang anda masukan tidak ada!!');
+        req.flash('alertMessage', 'Users Not Found');
         req.flash('alertStatus', 'danger');
         res.redirect('/admin/signin');
       }
       const isPasswordMatch = await bcrypt.compare(password, user.password);
       if (!isPasswordMatch) {
-        req.flash('alertMessage', 'Password yang anda masukan tidak cocok!!');
+        req.flash('alertMessage', 'Password do not match');
         req.flash('alertStatus', 'danger');
         res.redirect('/admin/signin');
       }
@@ -57,7 +58,7 @@ module.exports = {
     }
   },
 
-  actionLogout: (req, res) => {
+  actionLogout: async (req, res) => {
     req.session.destroy();
     res.redirect('/admin/signin');
   },
